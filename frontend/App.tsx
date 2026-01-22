@@ -5,16 +5,22 @@ import { Inventory } from './pages/Inventory';
 import { PropertyDetail } from './pages/PropertyDetail';
 import { AddProperty } from './pages/AddProperty';
 import { Billing } from './pages/Billing';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('dashboard');
+  const [currentPage, setCurrentPage] = useState('login'); // Default to login
   const [detailId, setDetailId] = useState<string | undefined>(undefined);
 
   const handleNavigate = (page: string, id?: string) => {
     if (id) setDetailId(id);
     setCurrentPage(page);
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
   };
+
+  // Pages that don't need the dashboard layout
+  if (currentPage === 'login') return <LoginPage onNavigate={handleNavigate} />;
+  if (currentPage === 'register') return <RegisterPage onNavigate={handleNavigate} />;
 
   const renderPage = () => {
     switch (currentPage) {

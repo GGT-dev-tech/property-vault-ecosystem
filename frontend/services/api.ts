@@ -63,7 +63,7 @@ export const api = {
     uploadImage: async (propertyId: string, file: File) => {
         const formData = new FormData();
         formData.append('file', file);
-
+        
         const res = await fetch(`${API_URL}/properties/${propertyId}/images`, {
             method: 'POST',
             body: formData,
@@ -71,6 +71,40 @@ export const api = {
 
         if (!res.ok) throw new Error('Failed to upload image');
         return res.json();
+    },
+
+    auth: {
+        login: async (email: string, password: string) => {
+            const res = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+            if (!res.ok) throw new Error('Login failed');
+            const data = await res.json();
+            if (data.access_token) {
+                localStorage.setItem('token', data.access_token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+            }
+            return data;
+        },
+        register: async (email: string, password: string, name: string) => {
+            const res = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, name }),
+            });
+            if (!res.ok) throw new Error('Registration failed');
+            return res.json(); 
+        },
+        logout: () => {
+             localStorage.removeItem('token');
+             localStorage.removeItem('user');
+        },
+        getCurrentUser: () => {
+            const userStr = localStorage.getItem('user');
+            return userStr ? JSON.parse(userStr) : null;
+        }
     }
 };
 
@@ -81,9 +115,9 @@ function adaptBackendToFrontend(backendProp: any): Property {
         external_property_id: backendProp.externalPropertyId,
         type: backendProp.type as PropertyType,
         address: backendProp.address,
-        city: backendProp.city ? backendProp.city.name : 'Unknown', // Frontend expects string
+        city: backendProp.city ? backendProp.city.name : 'Unknown',
         state_code: backendProp.state ? backendProp.state.code : 'XX',
-        zip_code: '00000', // Placeholder
+        zip_code: '00000', 
         land_area: backendProp.landArea || 0,
         built_area: backendProp.builtArea,
         price: backendProp.purchasePrice ? Number(backendProp.purchasePrice) : 0,
@@ -91,7 +125,7 @@ function adaptBackendToFrontend(backendProp: any): Property {
         flood_risk: backendProp.floodRisk,
         image_url: backendProp.images && backendProp.images.length > 0 ? backendProp.images[0].imageUrl : '',
         created_at: backendProp.createdAt,
-        status: 'Active', // Placeholder
+        status: 'Active', 
         coordinates: {
             lat: backendProp.latitude ? Number(backendProp.latitude) : 0,
             lng: backendProp.longitude ? Number(backendProp.longitude) : 0
