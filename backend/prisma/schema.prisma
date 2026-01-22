@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model State {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique // ex: CA, FL
+  counties  County[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  properties Property[]
+}
+
+model County {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   // Code within state context, or globally unique? Assuming per state for now, but usually counties have FIPS codes.
+  stateId   String
+  state     State    @relation(fields: [stateId], references: [id])
+  cities    City[]
+  properties Property[]
+  currentSequence Int @default(0) // For property tag generation
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([stateId, code]) // County code should be unique within a state
+}
+
+model City {
+  id        String   @id @default(uuid())
+  name      String
+  countyId  String
+  county    County   @relation(fields: [countyId], references: [id])
+  properties Property[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum PropertyType {
+  HOUSE
+  LOT
+  APARTMENT
+  COMMERCIAL
+}
+
+model Property {
+  id                  String   @id @default(uuid())
+  propertyTag         String   @unique
+  externalPropertyId  String // APN
+  type                PropertyType
+  
+  stateId             String
+  state               State    @relation(fields: [stateId], references: [id])
+  countyId            String
+  county              County   @relation(fields: [countyId], references: [id])
+  cityId              String
+  city                City     @relation(fields: [cityId], references: [id])
+  
+  address             String
+  latitude            Decimal?
+  longitude           Decimal?
+  landArea            Float?
+  builtArea           Float?
+  floodRisk           Boolean @default(false)
+  purchasePrice       Decimal?
+  marketEstimatedValue Decimal?
+  description         String?
+
+  images              PropertyImage[]
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+enum ImageType {
+  FRONT
+  LAND
+  DOCUMENT
+}
+
+model PropertyImage {
+  id          String   @id @default(uuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id])
+  imageUrl    String
+  type        ImageType
+  createdAt   DateTime @default(now())
+}
+
+model User {
+  id             String   @id @default(uuid())
+  name           String
+  email          String   @unique
+  passwordHash   String
+  subscriptionId String?
+  subscription   UserSubscription?
+  
+  posts          CommunityPost[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+model SubscriptionPlan {
+  id            String   @id @default(uuid())
+  name          String
+  maxProperties Int
+  price         Decimal
+  billingCycle  BillingCycle
+  subscriptions UserSubscription[]
+
+  createdAt     DateTime @default(now())
+}
+
+model UserSubscription {
+  id        String   @id @default(uuid())
+  userId    String   @unique // One active sub per user?
+  user      User     @relation(fields: [userId], references: [id])
+  planId    String
+  plan      SubscriptionPlan @relation(fields: [planId], references: [id])
+  active    Boolean  @default(true)
+  startDate DateTime @default(now())
+  endDate   DateTime? // Null if indefinite or auto-renew logic handled elsewhere
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum PostCategory {
+  OPPORTUNITY
+  NEWS
+  AD
+}
+
+model CommunityPost {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  content   String
+  category  PostCategory
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

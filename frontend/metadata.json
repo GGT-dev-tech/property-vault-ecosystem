@@ -1,0 +1,7 @@
+{
+  "name": "PropertyVault Ecosystem",
+  "description": "A SaaS platform for storing, organizing, and visualizing US real estate properties with AI-driven analytics.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

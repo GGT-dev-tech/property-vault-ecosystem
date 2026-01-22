@@ -1,0 +1,178 @@
+Você é um desenvolvedor de software sênior, especialista em ciência da computação, análise de sistemas e desenvolvimento de sistemas. Sua tarefa é analisar a especificação técnica fornecida abaixo, identificar potenciais melhorias, inconsistências ou lacunas, e então propor um plano de desenvolvimento detalhado, incluindo:
+
+Um diagrama ER (Entity-Relationship) para o modelo de dados, descrito em texto ou Markdown (se possível, use ferramentas para gerar visualizações).
+Sugestões de implementação para o backend (escolhendo entre REST ou GraphQL, justificando), com exemplos de endpoints ou schemas.
+Estrutura do frontend, com componentes principais em React e integração com o backend.
+Estratégias para escalabilidade, segurança (ex: autenticação JWT, validação de limites de assinatura) e integração futura com IA (ex: análise de risco de inundação ou valuation de propriedades).
+Estimativa de tempo e recursos para desenvolvimento inicial, assumindo uma equipe de 3-5 pessoas.
+Qualquer código inicial ou pseudocódigo para entidades chave, como geração da property_tag.
+Use ferramentas disponíveis, como execução de código para gerar diagramas ou simulações, buscas web para referências em bibliotecas (ex: PostgreSQL best practices), ou ferramentas de IA para refinar ideias. Mantenha o foco em práticas ágeis, clean code e conformidade com regulamentações imobiliárias nos EUA (ex: privacidade de dados).
+
+📐 Especificação Técnica Inicial
+Projeto: Property Storage & Real Estate Ecosystem (EUA)
+
+Visão Geral do Sistema
+Aplicação web voltada ao armazenamento, organização e visualização de propriedades imobiliárias nos Estados Unidos, com foco inicial em lotes e casas.
+O sistema permite:
+Cadastro estruturado de propriedades
+Identificação única por etiqueta padronizada
+Organização hierárquica por Estado → Condado → Cidade
+Consulta detalhada de dados técnicos da propriedade
+Modelo SaaS por assinatura, baseado na quantidade de propriedades armazenadas
+Ecossistema adicional de anúncios e comunidade
+Conceito Central: Etiqueta da Propriedade (Property Tag)
+Cada propriedade possui uma etiqueta única, utilizada como identificador principal no sistema.
+Formato da Etiqueta
+code
+Code
+[STATE_CODE]-[COUNTY_CODE]-[SEQUENTIAL_NUMBER]-[PROPERTY_EXTERNAL_ID]
+Exemplo
+
+code
+Code
+CA-LA-0003-APN12345678
+Onde:
+
+STATE_CODE: sigla do estado (ex: CA, FL, TX)
+COUNTY_CODE: código ou abreviação do condado
+SEQUENTIAL_NUMBER: número incremental da propriedade dentro daquele estado/condado
+PROPERTY_EXTERNAL_ID: identificador oficial da propriedade (ex: APN – Assessor’s Parcel Number)
+👉 Essa etiqueta é usada:
+
+Para busca
+Para acesso direto à propriedade
+Como identidade visual e lógica do sistema
+Entidades Principais (Modelo de Domínio)
+3.1 State
+Representa um estado dos EUA.
+Atributos
+id (UUID)
+name (string)
+code (string – ex: CA, FL)
+created_at
+updated_at
+3.2 County
+Representa um condado dentro de um estado.
+Atributos
+
+id (UUID)
+name (string)
+code (string)
+state_id (FK → State)
+created_at
+updated_at
+3.3 City
+Representa uma cidade dentro de um condado.
+Atributos
+
+id (UUID)
+name (string)
+county_id (FK → County)
+created_at
+updated_at
+3.4 Property
+Entidade central do sistema.
+Atributos
+
+id (UUID)
+property_tag (string, unique)
+external_property_id (string)
+type (enum: HOUSE, LOT, APARTMENT, COMMERCIAL)
+state_id (FK)
+county_id (FK)
+city_id (FK)
+address (string)
+latitude (decimal)
+longitude (decimal)
+land_area (float)
+built_area (float)
+flood_risk (boolean)
+purchase_price (decimal)
+market_estimated_value (decimal)
+description (text)
+created_at
+updated_at
+3.5 PropertyImage
+Armazena imagens da propriedade.
+Atributos
+
+id (UUID)
+property_id (FK → Property)
+image_url (string)
+type (enum: FRONT, LAND, DOCUMENT)
+created_at
+Usuários e Assinaturas (SaaS)
+4.1 User
+Usuário final do sistema.
+Atributos
+id (UUID)
+name
+email
+password_hash
+subscription_id (FK)
+created_at
+updated_at
+4.2 SubscriptionPlan
+Define os planos disponíveis.
+Atributos
+
+id (UUID)
+name (string)
+max_properties (int)
+price (decimal)
+billing_cycle (enum: MONTHLY, YEARLY)
+created_at
+Exemplo de Planos
+
+Plan X → até X propriedades → preço XY
+Plan Y → até Y propriedades → preço YZ
+Plan Z → até Z propriedades → preço ZZW
+4.3 UserSubscription
+Relaciona usuário e plano.
+Atributos
+
+id (UUID)
+user_id (FK)
+plan_id (FK)
+active (boolean)
+start_date
+end_date
+Ecossistema de Comunidade e Anúncios
+5.1 CommunityPost
+Posts de oportunidades e anúncios.
+Atributos
+id (UUID)
+user_id (FK)
+title
+content
+category (enum: OPPORTUNITY, NEWS, AD)
+created_at
+updated_at
+5.2 Advertiser (opcional – evolução futura)
+Usuários comerciais focados em anúncios.
+6. Regras de Negócio Essenciais
+
+Um usuário não pode cadastrar mais propriedades do que o limite do plano
+A property_tag é imutável após criação
+Propriedades são sempre vinculadas a:
+Estado
+Condado
+Cidade
+O sistema deve ser preparado para escala internacional, mas com foco inicial nos EUA
+Arquitetura Técnica (Sugestão Inicial)
+Frontend
+React (Vite)
+TailwindCSS
+Design moderno, limpo e profissional
+Paleta inspirada no mercado imobiliário dos EUA
+Mobile-first e responsivo
+Backend
+
+API REST ou GraphQL
+Autenticação JWT
+Camada de regras de negócio bem definida
+Preparado para integração com IA (ex: recomendação, análise de risco, valuation)
+Banco de Dados
+
+Relacional (PostgreSQL)
+Estrutura preparada para futuras integrações com dados públicos (APN, flood zones, etc.)
