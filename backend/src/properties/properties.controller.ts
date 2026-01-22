@@ -1,17 +1,19 @@
-import { Controller, Get, Post, Body, Param, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards, Request } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { PropertiesService } from './properties.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('properties')
 export class PropertiesController {
     constructor(private readonly propertiesService: PropertiesService) { }
 
+    @UseGuards(JwtAuthGuard)
     @Post()
-    create(@Body() createPropertyDto: CreatePropertyDto) {
-        return this.propertiesService.create(createPropertyDto);
+    create(@Body() createPropertyDto: CreatePropertyDto, @Request() req: any) {
+        return this.propertiesService.create(createPropertyDto, req.user.userId);
     }
 
     @Post(':id/images')

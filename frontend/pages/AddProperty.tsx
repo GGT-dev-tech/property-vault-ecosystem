@@ -103,8 +103,8 @@ export const AddProperty: React.FC<AddPropertyProps> = ({ onNavigate }) => {
 
             alert(`Property Created! Tag: ${newProp.propertyTag}`);
             onNavigate('inventory');
-        } catch (err) {
-            alert('Error creating property');
+        } catch (err: any) {
+            alert(err.message || 'Error creating property');
             console.error(err);
         }
     };

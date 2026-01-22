@@ -19,10 +19,17 @@ export interface CreatePropertyData {
     description?: string;
 }
 
+const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
+
 export const api = {
     getProperties: async (): Promise<Property[]> => {
         try {
-            const res = await fetch(`${API_URL}/properties`);
+            const res = await fetch(`${API_URL}/properties`, {
+                headers: { ...getAuthHeaders() }
+            });
             if (!res.ok) throw new Error('Failed to fetch properties');
             const data = await res.json();
             return data.map(adaptBackendToFrontend);
@@ -35,10 +42,16 @@ export const api = {
     createProperty: async (data: CreatePropertyData) => {
         const res = await fetch(`${API_URL}/properties`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            },
             body: JSON.stringify(data),
         });
-        if (!res.ok) throw new Error('Failed to create property');
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.message || 'Failed to create property');
+        }
         return res.json();
     },
 
@@ -63,9 +76,12 @@ export const api = {
     uploadImage: async (propertyId: string, file: File) => {
         const formData = new FormData();
         formData.append('file', file);
-        
+
         const res = await fetch(`${API_URL}/properties/${propertyId}/images`, {
             method: 'POST',
+            headers: {
+                ...getAuthHeaders()
+            },
             body: formData,
         });
 
@@ -95,11 +111,11 @@ export const api = {
                 body: JSON.stringify({ email, password, name }),
             });
             if (!res.ok) throw new Error('Registration failed');
-            return res.json(); 
+            return res.json();
         },
         logout: () => {
-             localStorage.removeItem('token');
-             localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
         },
         getCurrentUser: () => {
             const userStr = localStorage.getItem('user');
@@ -117,7 +133,7 @@ function adaptBackendToFrontend(backendProp: any): Property {
         address: backendProp.address,
         city: backendProp.city ? backendProp.city.name : 'Unknown',
         state_code: backendProp.state ? backendProp.state.code : 'XX',
-        zip_code: '00000', 
+        zip_code: '00000',
         land_area: backendProp.landArea || 0,
         built_area: backendProp.builtArea,
         price: backendProp.purchasePrice ? Number(backendProp.purchasePrice) : 0,
@@ -125,7 +141,7 @@ function adaptBackendToFrontend(backendProp: any): Property {
         flood_risk: backendProp.floodRisk,
         image_url: backendProp.images && backendProp.images.length > 0 ? backendProp.images[0].imageUrl : '',
         created_at: backendProp.createdAt,
-        status: 'Active', 
+        status: 'Active',
         coordinates: {
             lat: backendProp.latitude ? Number(backendProp.latitude) : 0,
             lng: backendProp.longitude ? Number(backendProp.longitude) : 0

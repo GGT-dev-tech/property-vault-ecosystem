@@ -56,6 +56,9 @@ model Property {
   externalPropertyId  String // APN
   type                PropertyType
   
+  userId              String
+  user                User     @relation(fields: [userId], references: [id])
+
   stateId             String
   state               State    @relation(fields: [stateId], references: [id])
   countyId            String
@@ -102,6 +105,7 @@ model User {
   subscriptionId String?
   subscription   UserSubscription?
   
+  properties     Property[]
   posts          CommunityPost[]
 
   createdAt      DateTime @default(now())
