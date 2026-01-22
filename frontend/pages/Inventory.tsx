@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import { Property, formatCurrency } from '../services/mockData'; // Ensure Property type matches
+import { formatCurrency } from '../services/mockData';
+import { Property } from '../types';
 
 interface InventoryProps {
     onNavigate: (page: string, id?: string) => void;

@@ -14,6 +14,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PropertiesController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
+const path_1 = require("path");
 const properties_service_1 = require("./properties.service");
 const create_property_dto_1 = require("./dto/create-property.dto");
 let PropertiesController = class PropertiesController {
@@ -23,6 +26,10 @@ let PropertiesController = class PropertiesController {
     }
     create(createPropertyDto) {
         return this.propertiesService.create(createPropertyDto);
+    }
+    uploadImage(id, file) {
+        const imageUrl = `/uploads/${file.filename}`;
+        return this.propertiesService.addImage(id, imageUrl, 'FRONT');
     }
     findAll() {
         return this.propertiesService.findAll();
@@ -39,6 +46,29 @@ __decorate([
     __metadata("design:paramtypes", [create_property_dto_1.CreatePropertyDto]),
     __metadata("design:returntype", void 0)
 ], PropertiesController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)(':id/images'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: './uploads',
+            filename: (req, file, callback) => {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+                const ext = (0, path_1.extname)(file.originalname);
+                callback(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+            },
+        }),
+    })),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.UploadedFile)(new common_1.ParseFilePipe({
+        validators: [
+            new common_1.MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
+            new common_1.FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
+        ],
+    }))),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], PropertiesController.prototype, "uploadImage", null);
 __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),

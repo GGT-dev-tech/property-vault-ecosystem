@@ -67,4 +67,13 @@ export class PropertiesService {
             }
         })
     }
+    async addImage(propertyId: string, imageUrl: string, type: string) {
+        return this.prisma.propertyImage.create({
+            data: {
+                propertyId,
+                imageUrl,
+                type: type as any, // Using 'any' to match Enum string
+            },
+        });
+    }
 }

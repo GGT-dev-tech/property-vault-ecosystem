@@ -65,6 +65,15 @@ let PropertiesService = class PropertiesService {
             }
         });
     }
+    async addImage(propertyId, imageUrl, type) {
+        return this.prisma.propertyImage.create({
+            data: {
+                propertyId,
+                imageUrl,
+                type: type,
+            },
+        });
+    }
 };
 exports.PropertiesService = PropertiesService;
 exports.PropertiesService = PropertiesService = __decorate([

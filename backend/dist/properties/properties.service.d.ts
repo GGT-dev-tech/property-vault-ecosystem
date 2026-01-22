@@ -125,4 +125,11 @@ export declare class PropertiesService {
         createdAt: Date;
         updatedAt: Date;
     }) | null, null, import("@prisma/client/runtime/library").DefaultArgs>;
+    addImage(propertyId: string, imageUrl: string, type: string): Promise<{
+        type: import(".prisma/client").$Enums.ImageType;
+        id: string;
+        createdAt: Date;
+        propertyId: string;
+        imageUrl: string;
+    }>;
 }

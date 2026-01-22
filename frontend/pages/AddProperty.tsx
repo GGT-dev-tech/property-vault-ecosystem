@@ -8,6 +8,7 @@ interface AddPropertyProps {
 
 export const AddProperty: React.FC<AddPropertyProps> = ({ onNavigate }) => {
     // Basic form state
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [formData, setFormData] = useState({
         extId: '',
         address: '',
@@ -90,6 +91,16 @@ export const AddProperty: React.FC<AddPropertyProps> = ({ onNavigate }) => {
             };
 
             const newProp = await api.createProperty(payload);
+
+            if (imageFile) {
+                try {
+                    await api.uploadImage(newProp.id, imageFile);
+                } catch (imgError) {
+                    console.error("Image upload failed", imgError);
+                    alert("Property created, but image upload failed.");
+                }
+            }
+
             alert(`Property Created! Tag: ${newProp.propertyTag}`);
             onNavigate('inventory');
         } catch (err) {
@@ -169,6 +180,25 @@ export const AddProperty: React.FC<AddPropertyProps> = ({ onNavigate }) => {
                             value={formData.address}
                             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                         />
+                    </label>
+                </section>
+
+                <hr className="border-[#e7ebf3] dark:border-[#2d364d]" />
+
+                <section>
+                    <div className="flex items-center gap-2 mb-6 text-primary">
+                        <span className="material-symbols-outlined">image</span>
+                        <h2 className="text-slate-900 dark:text-white text-[22px] font-bold leading-tight">Property Image</h2>
+                    </div>
+                    <label className="flex flex-col gap-2">
+                        <span className="text-slate-900 dark:text-white text-sm font-semibold">Main Photo</span>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="form-input rounded-lg border-[#d0d7e7] dark:border-[#2d364d] bg-background-light dark:bg-[#111621] dark:text-white h-12 px-4 pt-2 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-blue-700"
+                            onChange={(e) => setImageFile(e.target.files ? e.target.files[0] : null)}
+                        />
+                        <p className="text-xs text-[#4d6599]">Upload a main image for the property (Max 5MB).</p>
                     </label>
                 </section>
 

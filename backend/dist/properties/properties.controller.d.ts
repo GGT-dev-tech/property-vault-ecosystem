@@ -23,6 +23,13 @@ export declare class PropertiesController {
         createdAt: Date;
         updatedAt: Date;
     }>;
+    uploadImage(id: string, file: Express.Multer.File): Promise<{
+        type: import(".prisma/client").$Enums.ImageType;
+        id: string;
+        createdAt: Date;
+        propertyId: string;
+        imageUrl: string;
+    }>;
     findAll(): import(".prisma/client").Prisma.PrismaPromise<({
         state: {
             name: string;

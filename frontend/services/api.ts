@@ -58,6 +58,19 @@ export const api = {
         const res = await fetch(`${API_URL}/locations/counties/${countyId}/cities`);
         if (!res.ok) throw new Error('Failed to fetch cities');
         return res.json();
+    },
+
+    uploadImage: async (propertyId: string, file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const res = await fetch(`${API_URL}/properties/${propertyId}/images`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!res.ok) throw new Error('Failed to upload image');
+        return res.json();
     }
 };
 
